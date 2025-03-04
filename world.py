@@ -1,7 +1,7 @@
 from perlin_noise import PerlinNoise
 import random
 
-from data import BLOCKS, DIRT, GRASS, LOG, SAND, STONE, Block, LEAVES
+from data import DIRT, GRASS, LOG, SAND, STONE, Block, LEAVES
 
 class World:
     on_update: "function"

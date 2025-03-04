@@ -1,7 +1,5 @@
-import asyncio
 import json
 import os
-import pickle
 import random
 import sys
 from textual.app import App, ComposeResult
@@ -12,9 +10,8 @@ from textual.containers import HorizontalGroup, HorizontalScroll, Center, Contai
 from textual.widget import Widget
 from textual.reactive import reactive, var
 from textual.message import Message
-from textual.screen import ModalScreen, Screen
+from textual.screen import ModalScreen
 from rich.text import Text, Span
-import traceback
 
 from data import BLOCKS, Block, get_block
 from world import World
@@ -32,7 +29,7 @@ class BlockBar(Widget):
         for block in BLOCKS:
             block_id, char, color, name = block
             btn = Button(label=f"{char}: {name}", id=block_id, classes=("active" if self.block.id == block_id else ""))
-            btn.styles.color = color
+            btn.styles.color = color.split(" ")[0]
             btn.can_focus = False
             btns.append(btn)
         yield HorizontalScroll(*btns)
@@ -43,6 +40,8 @@ class BlockBar(Widget):
     def select_block(self, block: Block):
         # self.log.error("  ".join(traceback.format_stack()))
         # self.notify("changed block")
+        # for btn in self.query_children(Button).nodes:
+        #     if btn.id == block.id: self.focus(btn)
         self.post_message(BlockBar.Selected(block))
     def next_block(self):
         i = BLOCKS.index(self.block)
@@ -56,7 +55,6 @@ OVERSIZED = -1
 class WorldDisplay(Static):
     def __init__(self, world: World, start_cam: tuple[int, int], mt: "MineTerminal"):
         super().__init__(markup=False, expand=True, shrink=False)
-        print(world.seed)
         self.world = world
         self.world.on_update = self.refresh
         self._drag = False
@@ -200,6 +198,7 @@ class MineTerminal(Widget):
                 self.world.changed[(cx, cy)] = get_block(data[coords]) if data[coords] is not None else None
         self.set_reactive(MineTerminal.camera, tuple(data["meta"]["cam"]) if "meta" in data else (0, self.world.default_height_at(0) - 5))
         self.can_focus = True
+        self.focus()
     
     def on_mouse_scroll_up(self, evt: MouseScrollUp):
         if not self.playing: return
